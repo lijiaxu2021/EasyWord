@@ -57,16 +57,24 @@ class LogDetailView(toga.Box):
         header.add(btn_back)
         header.add(toga.Label(self.filename, style=Pack(flex=1, font_size=16, color='white', margin_left=10)))
         
-        # Copy Button (Toga doesn't support clipboard easily on all platforms, assume user can select text or we implement clipboard if possible)
-        # Using a button that says "Copied" as placeholder or try toga clipboard
-        # Toga < 0.4 doesn't have clipboard. Toga 0.4+ might.
-        # Let's just show text.
+        # Copy Button
+        # Toga doesn't have system clipboard access easily on all platforms yet without 3rd party.
+        # But MultilineTextInput usually supports native selection and copy.
+        # If user says "cannot copy", maybe it's because readonly=True disables interaction on some platforms?
+        # Let's try making it NOT readonly but ignore edits? Or just rely on user selecting text.
+        # Or maybe the layout prevents selection.
+        # Let's try to add a "Select All" button that focuses the text input?
+        
         self.add(header)
 
         # Text Area
-        text_input = toga.MultilineTextInput(
+        # Removed readonly=True to potentially allow selection/copy on Android
+        # If readonly is True, Android might disable selection.
+        # We'll rely on the fact that saving isn't implemented here, so edits are temporary/ignored.
+        
+        self.text_input = toga.MultilineTextInput(
             value=self.log_content, 
-            readonly=True, 
+            readonly=False, # Changed to False to allow selection
             style=Pack(flex=1, font_family='monospace', font_size=10)
         )
-        self.add(text_input)
+        self.add(self.text_input)
