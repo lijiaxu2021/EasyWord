@@ -128,6 +128,8 @@ class LibraryDetailView(toga.Box):
         info_box = toga.Box(style=Pack(direction=COLUMN, flex=1))
         
         # Word Text as Button for interaction
+        # Note: 'alignment' is not a valid style for Button in Toga. 
+        # Removing it. Button text alignment is platform dependent (usually center).
         btn_word = toga.Button(
             word['word'],
             on_press=lambda w, wd=word: self.on_word_click(wd),
@@ -135,8 +137,7 @@ class LibraryDetailView(toga.Box):
                 background_color='transparent', 
                 color=COLOR_TEXT_PRIMARY, 
                 font_weight='bold', 
-                font_size=16,
-                alignment='left'
+                font_size=16
             )
         )
         info_box.add(btn_word)
