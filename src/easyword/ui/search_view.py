@@ -95,9 +95,9 @@ class SearchWordView(toga.Box):
             # So if it exists, maybe show existing? But user implies "Real-time learn", usually implies fetching new info.
             # Let's try AI lookup first.
             
-            print(f"DEBUG: Starting AI lookup for {word}")
+            print(f"DEBUG: Starting AI lookup for {word} | 开始 AI 查词: {word}")
             res = lookup_word_ai(word)
-            print(f"DEBUG: AI Result: {res}")
+            print(f"DEBUG: AI Result: {res} | AI 返回结果: {res}")
             
             def on_complete():
                 self.btn_search.enabled = True
@@ -106,7 +106,7 @@ class SearchWordView(toga.Box):
                 
                 if res:
                     # Save to DB
-                    print("DEBUG: Processing AI result...")
+                    print("DEBUG: Processing AI result... | 正在处理 AI 结果...")
                     def_cn = res.get('definition_cn', '')
                     memory_method = res.get('memory_method', '')
                     example = res.get('example', '')
@@ -130,11 +130,11 @@ class SearchWordView(toga.Box):
                     
                     # For simplicity: Try Add. If None (exists), Update.
                     lib_id = self.app.current_library_id
-                    print(f"DEBUG: Current Library ID: {lib_id}")
+                    print(f"DEBUG: Current Library ID: {lib_id} | 当前词库 ID: {lib_id}")
                     
                     # Try fetch existing to get ID
                     existing = self.app.db_manager.get_word_by_text(lib_id, word)
-                    print(f"DEBUG: Existing word: {existing}")
+                    print(f"DEBUG: Existing word: {existing} | 已存在单词: {existing}")
                     
                     if existing:
                         # Update fields
@@ -158,12 +158,12 @@ class SearchWordView(toga.Box):
                             memory_method=memory_method,
                             library_id=lib_id
                         )
-                        print(f"DEBUG: New ID: {new_id}")
+                        print(f"DEBUG: New ID: {new_id} | 新单词 ID: {new_id}")
                         if new_id:
                             final_word_data = res
                             final_word_data['id'] = new_id
                         else:
-                            print("DEBUG: Failed to add word to DB")
+                            print("DEBUG: Failed to add word to DB | 添加到数据库失败")
                             # Try to use dialog instead of deprecated info_dialog
                             self.app.main_window.dialog(toga.InfoDialog("错误", "保存失败 (DB Error)"))
                             return
@@ -181,7 +181,7 @@ class SearchWordView(toga.Box):
                     self.content_area.add(card)
                     
                 else:
-                    print("DEBUG: AI result is None or Empty")
+                    print("DEBUG: AI result is None or Empty | AI 结果为空")
                     self.content_area.add(toga.Label("查询失败，请重试", style=Pack(margin=20, align_items=CENTER, color=COLOR_ERROR)))
 
             self.app.loop.call_soon_threadsafe(on_complete)

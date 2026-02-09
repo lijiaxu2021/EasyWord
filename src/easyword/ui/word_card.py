@@ -64,7 +64,8 @@ class WordCard(toga.Box):
                 lines = text.split('\n')
                 for line in lines:
                     # MultilineLabel to ensure wrapping
-                    # Increased height/flex to ensure full visibility
+                    # Removing min_height as it's not supported in current Toga version's Pack style
+                    # Instead, we rely on flex=1 and content to determine height
                     box.add(toga.MultilineTextInput(
                         value=line.strip(),
                         readonly=True,
@@ -72,9 +73,8 @@ class WordCard(toga.Box):
                             font_size=16, 
                             font_style='italic', 
                             color='#455A64', 
-                            padding_bottom=4, # Increased spacing
+                            padding_bottom=4, 
                             flex=1, 
-                            min_height=60, # Ensure enough height for 2-3 lines
                             background_color='transparent'
                         )
                     ))
@@ -90,7 +90,6 @@ class WordCard(toga.Box):
                             color=COLOR_TEXT_PRIMARY, 
                             padding_bottom=4, 
                             flex=1, 
-                            min_height=40, # Minimum height
                             background_color='transparent'
                         )
                     ))
