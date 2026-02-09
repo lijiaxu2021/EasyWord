@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+.idea/
+.vscode/
+build/
+dist/
+logs/
+applist/
+local/
+iOS/
+android/
+windows/
+linux/
+macOS/
+.briefcase/

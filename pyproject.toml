@@ -1,0 +1,57 @@
+[build-system]
+requires = ["briefcase"]
+
+[tool.briefcase]
+project_name = "EasyWord"
+bundle = "com.easyword"
+version = "0.3.1"
+url = "https://example.com/easyword"
+license = "MIT"
+author = "EasyWord Dev"
+author_email = "support@easyword.com"
+
+[tool.briefcase.app.easyword]
+formal_name = "EasyWord"
+description = "An offline vocabulary learning app."
+long_description = "A powerful offline vocabulary learning application with flashcards, spaced repetition, and quizzes."
+sources = ["src/easyword"]
+requires = [
+    "requests",
+]
+
+[tool.briefcase.app.easyword.macOS]
+requires = [
+    "toga-cocoa>=0.4.0",
+    "std-nslog",
+]
+
+[tool.briefcase.app.easyword.linux]
+requires = [
+    "toga-gtk>=0.4.0",
+]
+
+[tool.briefcase.app.easyword.windows]
+requires = [
+    "toga-winforms>=0.4.0",
+]
+
+# Mobile deployments
+[tool.briefcase.app.easyword.iOS]
+requires = [
+    "toga-iOS>=0.4.0",
+    "std-nslog",
+]
+
+[tool.briefcase.app.easyword.android]
+requires = [
+    "toga-android>=0.4.0",
+]
+permissions = [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+]
+build_gradle_dependencies = [
+    "androidx.appcompat:appcompat:1.6.1",
+    "com.google.android.material:material:1.12.0",
+    "androidx.constraintlayout:constraintlayout:2.1.4",
+]

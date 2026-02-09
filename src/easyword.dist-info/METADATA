@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Briefcase-Version: 0.3.26
+Name: easyword
+Formal-Name: EasyWord
+App-ID: com.easyword.easyword
+Version: 0.1.0
+Home-page: https://example.com/easyword
+Download-URL: https://example.com/easyword
+Author: EasyWord Dev
+Author-email: support@easyword.com
+Summary: An offline vocabulary learning app.
