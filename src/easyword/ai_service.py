@@ -75,17 +75,19 @@ def lookup_word_ai(word):
     }
     
     prompt = f"""
-    Detailed analysis of the English word: "{word}"
+    You are an English dictionary assistant. detailed analysis of the English word: "{word}".
     
-    Provide the result in a strict JSON Object format with the following fields:
-    - "word": "{word}"
-    - "phonetic": IPA phonetic symbol.
-    - "definition_cn": Detailed Chinese definition with parts of speech.
-    - "definition_en": Concise English definition.
-    - "example": String containing 3 example sentences with Chinese translations.
-    - "memory_method": A comprehensive memory method guide in Chinese. This section should be around 300 Chinese characters, explaining root/affix, associations, or stories to help memorize this word deeply.
+    STRICTLY return ONLY a JSON Object. Do not include any markdown formatting, backticks, or explanatory text.
     
-    Only return the JSON Object, no other text.
+    JSON Structure:
+    {{
+        "word": "{word}",
+        "phonetic": "IPA symbol",
+        "definition_cn": "Detailed Chinese definition with parts of speech",
+        "definition_en": "Concise English definition",
+        "example": "3 example sentences with Chinese translations (separated by newlines)",
+        "memory_method": "A creative memory aid in Chinese (approx. 300 chars)"
+    }}
     """
     
     try:
@@ -93,21 +95,24 @@ def lookup_word_ai(word):
             "model": MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 2048,
-            "temperature": 0.7
+            "temperature": 0.5 # Lower temperature for more stable JSON
         }, timeout=20)
         
         response.raise_for_status()
         data = response.json()
         content = data['choices'][0]['message']['content']
         
-        # Extract JSON
-        start = content.find('{')
-        end = content.rfind('}') + 1
+        # Robust Clean up
+        clean_content = content.replace("```json", "").replace("```", "").strip()
+        
+        # Extract JSON if mixed with text
+        start = clean_content.find('{')
+        end = clean_content.rfind('}') + 1
         if start != -1 and end != 0:
-            json_str = content[start:end]
+            json_str = clean_content[start:end]
             return json.loads(json_str)
         else:
-            return json.loads(content)
+            return json.loads(clean_content)
             
     except Exception as e:
         print(f"AI Lookup Error: {e}")

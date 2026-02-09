@@ -97,10 +97,14 @@ class SearchWordView(toga.Box):
                     phonetic = res.get('phonetic', '')
                     def_en = res.get('definition_en', '')
                     
-                    # Convert fields if they are lists (just in case AI returns lists)
-                    if isinstance(def_cn, list): def_cn = "\n".join(def_cn)
-                    if isinstance(example, list): example = "\n".join(example)
-                    
+                    # Ensure strings (AI might return list for examples or definitions)
+                    if isinstance(def_cn, list): 
+                        def_cn = "\n".join([str(x) for x in def_cn])
+                    if isinstance(example, list): 
+                        example = "\n".join([str(x) for x in example])
+                    if isinstance(memory_method, list):
+                        memory_method = "\n".join([str(x) for x in memory_method])
+                        
                     # Add/Update word
                     # If exists, update? Or add new?
                     # Schema has UNIQUE(library_id, word).

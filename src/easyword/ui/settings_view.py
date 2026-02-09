@@ -30,7 +30,7 @@ class LogListView(toga.Box):
                 btn = toga.Button(
                     f"📄 {f}",
                     on_press=lambda w, fn=f: self.show_log_content(fn),
-                    style=Pack(margin_bottom=10, height=50, background_color='white', alignment='left')
+                    style=Pack(margin_bottom=10, height=50, background_color='white')
                 )
                 self.content.add(btn)
                 
