@@ -171,4 +171,4 @@
 ---
 
 **EasyWord - Make Vocabulary Easy.**
-Developed by [lijiaxu2021](https://github.com/lijiaxu2021) & Trae AI.
+Developed by [lijiaxu2021](https://github.com/lijiaxu2021)
