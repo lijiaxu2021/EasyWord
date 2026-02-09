@@ -66,14 +66,27 @@ class SearchWordView(toga.Box):
     def do_search(self, widget):
         word = self.input_search.value.strip()
         if not word:
+            # Simple shake animation simulation (change border color briefly)
+            # Toga doesn't support border color change dynamically well yet, 
+            # but we can try changing background color or show a quick toast-like label.
+            self.input_search.style.background_color = '#FFEBEE' # Light red
+            def reset_color():
+                import time
+                time.sleep(0.2)
+                self.input_search.style.background_color = COLOR_SURFACE
+                self.input_search.refresh()
+            threading.Thread(target=reset_color, daemon=True).start()
             return
             
         # UI Update
         self.btn_search.enabled = False
-        self.btn_search.text = "..."
+        self.btn_search.text = "⏳" # Icon change for feedback
         self.content_area.clear()
         
-        loading_label = toga.Label("AI 正在分析中...", style=Pack(margin=20, align_items=CENTER))
+        # Animate loading dots? 
+        # Toga labels are static. We can update text in a loop?
+        # Let's keep it simple with a clear message.
+        loading_label = toga.Label("AI 正在深度分析...", style=Pack(margin=20, align_items=CENTER, font_weight='bold', color=COLOR_PRIMARY))
         self.content_area.add(loading_label)
         
         def run():

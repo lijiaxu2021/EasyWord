@@ -64,10 +64,19 @@ class WordCard(toga.Box):
                 lines = text.split('\n')
                 for line in lines:
                     # MultilineLabel to ensure wrapping
+                    # Increased height/flex to ensure full visibility
                     box.add(toga.MultilineTextInput(
                         value=line.strip(),
                         readonly=True,
-                        style=Pack(font_size=16, font_style='italic', color='#455A64', padding_bottom=2, flex=1, background_color='transparent')
+                        style=Pack(
+                            font_size=16, 
+                            font_style='italic', 
+                            color='#455A64', 
+                            padding_bottom=4, # Increased spacing
+                            flex=1, 
+                            min_height=60, # Ensure enough height for 2-3 lines
+                            background_color='transparent'
+                        )
                     ))
             else:
                 # Definition: split by newlines if any for better formatting
@@ -76,7 +85,14 @@ class WordCard(toga.Box):
                     box.add(toga.MultilineTextInput(
                         value=line.strip(),
                         readonly=True,
-                        style=Pack(font_size=16, color=COLOR_TEXT_PRIMARY, padding_bottom=2, flex=1, background_color='transparent')
+                        style=Pack(
+                            font_size=16, 
+                            color=COLOR_TEXT_PRIMARY, 
+                            padding_bottom=4, 
+                            flex=1, 
+                            min_height=40, # Minimum height
+                            background_color='transparent'
+                        )
                     ))
                     
             self.details_box.add(box)
