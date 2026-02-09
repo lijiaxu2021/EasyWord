@@ -63,17 +63,20 @@ class WordCard(toga.Box):
             if is_example:
                 lines = text.split('\n')
                 for line in lines:
-                    box.add(toga.Label(
-                        line.strip(), 
-                        style=Pack(font_size=16, font_style='italic', color='#455A64', padding_bottom=2, flex=1)
+                    # MultilineLabel to ensure wrapping
+                    box.add(toga.MultilineTextInput(
+                        value=line.strip(),
+                        readonly=True,
+                        style=Pack(font_size=16, font_style='italic', color='#455A64', padding_bottom=2, flex=1, background_color='transparent')
                     ))
             else:
                 # Definition: split by newlines if any for better formatting
                 lines = text.split('\n')
                 for line in lines:
-                    box.add(toga.Label(
-                        line.strip(), 
-                        style=Pack(font_size=16, color=COLOR_TEXT_PRIMARY, padding_bottom=2, flex=1)
+                    box.add(toga.MultilineTextInput(
+                        value=line.strip(),
+                        readonly=True,
+                        style=Pack(font_size=16, color=COLOR_TEXT_PRIMARY, padding_bottom=2, flex=1, background_color='transparent')
                     ))
                     
             self.details_box.add(box)
