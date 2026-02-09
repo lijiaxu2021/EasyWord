@@ -92,6 +92,10 @@ class WordCard(toga.Box):
         # Example
         if self.word_data.get('example'):
             add_section("EXAMPLE", self.word_data['example'], is_example=True)
+
+        # Memory Method (New)
+        if self.word_data.get('memory_method'):
+            add_section("记忆方法", self.word_data['memory_method'])
             
         content.add(self.details_box)
         

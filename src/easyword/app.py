@@ -31,6 +31,7 @@ class EasyWordApp(toga.App):
             from .ui.bulk_import_view import BulkImportView
             from .ui.word_card import WordCard
             from .ui.quiz_view import QuizView
+            from .ui.search_view import SearchWordView
             from .ui.settings_view import LogListView, LogDetailView
             
             print("Modules imported.")
@@ -53,6 +54,7 @@ class EasyWordApp(toga.App):
             self.BulkImportView = BulkImportView
             self.WordCard = WordCard
             self.QuizView = QuizView
+            self.SearchWordView = SearchWordView
             self.LogListView = LogListView
             self.LogDetailView = LogDetailView
             
@@ -85,6 +87,7 @@ class EasyWordApp(toga.App):
                 )
 
             self.nav_bar.add(make_nav_btn("学习", "📖", lambda w: self.switch_tab(0)))
+            self.nav_bar.add(make_nav_btn("查词", "🔍", lambda w: self.switch_tab(3))) # New Tab
             self.nav_bar.add(make_nav_btn("检验", "📝", lambda w: self.switch_tab(1)))
             self.nav_bar.add(make_nav_btn("词库", "📚", lambda w: self.switch_tab(2)))
 
@@ -124,6 +127,10 @@ class EasyWordApp(toga.App):
             # Libraries Tab
             self.library_view = self.LibraryView(self, on_select_library=self.on_library_selected)
             self.content_area.add(self.library_view)
+        elif index == 3:
+            # Search Tab
+            self.search_view = self.SearchWordView(self)
+            self.content_area.add(self.search_view)
 
     def on_library_selected(self, lib):
         print(f"Selected library: {lib['name']}")

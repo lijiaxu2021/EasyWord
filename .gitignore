@@ -7,7 +7,6 @@ __pycache__/
 build/
 dist/
 logs/
-applist/
 local/
 iOS/
 android/

@@ -82,6 +82,16 @@ class DatabaseManager:
                             
                     except sqlite3.OperationalError as e:
                         print(f"Migration error (add uid): {e}")
+
+                # 3. memory_method
+                try:
+                    cursor.execute("SELECT memory_method FROM words LIMIT 1")
+                except sqlite3.OperationalError:
+                    print("Migrating: Adding memory_method to words table")
+                    try:
+                        cursor.execute("ALTER TABLE words ADD COLUMN memory_method TEXT")
+                    except sqlite3.OperationalError as e:
+                        print(f"Migration error (add memory_method): {e}")
                 
                 conn.commit()
         except Exception as e:
@@ -123,15 +133,15 @@ class DatabaseManager:
 
     # --- Word Management ---
     
-    def add_word(self, word, definition_cn, phonetic="", definition_en="", example="", category="General", library_id=1):
+    def add_word(self, word, definition_cn, phonetic="", definition_en="", example="", memory_method="", category="General", library_id=1):
         try:
             new_uid = str(uuid.uuid4())
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    INSERT INTO words (uid, library_id, word, definition_cn, phonetic, definition_en, example, category)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (new_uid, library_id, word, definition_cn, phonetic, definition_en, example, category))
+                    INSERT INTO words (uid, library_id, word, definition_cn, phonetic, definition_en, example, memory_method, category)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (new_uid, library_id, word, definition_cn, phonetic, definition_en, example, memory_method, category))
                 conn.commit()
                 return cursor.lastrowid
         except sqlite3.IntegrityError:
@@ -140,6 +150,24 @@ class DatabaseManager:
         except Exception as e:
             print(f"Database Error in add_word: {e}")
             return None
+
+    def get_word_by_text(self, library_id, word):
+        with self.get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM words WHERE library_id = ? AND word = ?", (library_id, word))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def update_word_details(self, word_id, definition_cn, phonetic, definition_en, example, memory_method):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE words 
+                SET definition_cn = ?, phonetic = ?, definition_en = ?, example = ?, memory_method = ?
+                WHERE id = ?
+            """, (definition_cn, phonetic, definition_en, example, memory_method, word_id))
+            conn.commit()
 
     def get_words_by_library(self, library_id, search_query=None):
         with self.get_connection() as conn:

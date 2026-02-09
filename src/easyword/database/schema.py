@@ -17,13 +17,14 @@ INSERT OR IGNORE INTO libraries (id, name, description) VALUES (1, '默认词库
 CREATE_WORDS_TABLE = """
 CREATE TABLE IF NOT EXISTS words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    uid TEXT UNIQUE, -- Globally Unique ID for sync
+    uid TEXT UNIQUE,
     library_id INTEGER DEFAULT 1,
     word TEXT NOT NULL,
     phonetic TEXT,
     definition_cn TEXT, 
     definition_en TEXT,
     example TEXT, 
+    memory_method TEXT, -- AI generated memory aid
     level INTEGER DEFAULT 1,
     category TEXT,
     tags TEXT,
