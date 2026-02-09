@@ -16,7 +16,7 @@ class SearchWordView(toga.Box):
         # 1. Header
         header = toga.Box(style=Pack(
             direction=ROW, 
-            padding=15, 
+            margin=15, 
             background_color=COLOR_PRIMARY,
             align_items=CENTER
         ))
@@ -26,7 +26,7 @@ class SearchWordView(toga.Box):
         # 2. Search Bar
         search_box = toga.Box(style=Pack(
             direction=ROW, 
-            padding=20, 
+            margin=20, 
             background_color=COLOR_SURFACE,
             align_items=CENTER
         ))
@@ -54,10 +54,10 @@ class SearchWordView(toga.Box):
         self.add(search_box)
         
         # 3. Content Area (Result)
-        self.content_area = toga.Box(style=Pack(flex=1, direction=COLUMN, padding=10))
+        self.content_area = toga.Box(style=Pack(flex=1, direction=COLUMN, margin=10))
         
         # Default State
-        self.placeholder_box = toga.Box(style=Pack(flex=1, direction=COLUMN, alignment=CENTER))
+        self.placeholder_box = toga.Box(style=Pack(flex=1, direction=COLUMN, align_items=CENTER))
         self.placeholder_box.add(toga.Label("输入单词开始学习", style=Pack(font_size=14, color=COLOR_TEXT_SECONDARY)))
         self.content_area.add(self.placeholder_box)
         
@@ -73,7 +73,7 @@ class SearchWordView(toga.Box):
         self.btn_search.text = "..."
         self.content_area.clear()
         
-        loading_label = toga.Label("AI 正在分析中...", style=Pack(padding=20, alignment=CENTER))
+        loading_label = toga.Label("AI 正在分析中...", style=Pack(margin=20, align_items=CENTER))
         self.content_area.add(loading_label)
         
         def run():
@@ -82,7 +82,9 @@ class SearchWordView(toga.Box):
             # So if it exists, maybe show existing? But user implies "Real-time learn", usually implies fetching new info.
             # Let's try AI lookup first.
             
+            print(f"DEBUG: Starting AI lookup for {word}")
             res = lookup_word_ai(word)
+            print(f"DEBUG: AI Result: {res}")
             
             def on_complete():
                 self.btn_search.enabled = True
@@ -91,6 +93,7 @@ class SearchWordView(toga.Box):
                 
                 if res:
                     # Save to DB
+                    print("DEBUG: Processing AI result...")
                     def_cn = res.get('definition_cn', '')
                     memory_method = res.get('memory_method', '')
                     example = res.get('example', '')
@@ -114,9 +117,11 @@ class SearchWordView(toga.Box):
                     
                     # For simplicity: Try Add. If None (exists), Update.
                     lib_id = self.app.current_library_id
+                    print(f"DEBUG: Current Library ID: {lib_id}")
                     
                     # Try fetch existing to get ID
                     existing = self.app.db_manager.get_word_by_text(lib_id, word)
+                    print(f"DEBUG: Existing word: {existing}")
                     
                     if existing:
                         # Update fields
@@ -140,11 +145,14 @@ class SearchWordView(toga.Box):
                             memory_method=memory_method,
                             library_id=lib_id
                         )
+                        print(f"DEBUG: New ID: {new_id}")
                         if new_id:
                             final_word_data = res
                             final_word_data['id'] = new_id
                         else:
-                            self.app.main_window.info_dialog("错误", "保存失败")
+                            print("DEBUG: Failed to add word to DB")
+                            # Try to use dialog instead of deprecated info_dialog
+                            self.app.main_window.dialog(toga.InfoDialog("错误", "保存失败 (DB Error)"))
                             return
 
                     # Show Card
@@ -160,7 +168,8 @@ class SearchWordView(toga.Box):
                     self.content_area.add(card)
                     
                 else:
-                    self.content_area.add(toga.Label("查询失败，请重试", style=Pack(padding=20, alignment=CENTER, color=COLOR_ERROR)))
+                    print("DEBUG: AI result is None or Empty")
+                    self.content_area.add(toga.Label("查询失败，请重试", style=Pack(margin=20, align_items=CENTER, color=COLOR_ERROR)))
 
             self.app.loop.call_soon_threadsafe(on_complete)
 

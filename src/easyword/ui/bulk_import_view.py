@@ -114,10 +114,12 @@ class BulkImportView(toga.Box):
                             if res:
                                 count += 1
                     
-                    self.app.main_window.info_dialog("完成", f"成功导入 {count} 个单词！")
+                    self.app.main_window.dialog(toga.InfoDialog("完成", f"成功导入 {count} 个单词！"))
                     self.on_cancel() # Go back
                 else:
-                    self.app.main_window.info_dialog("失败", "AI 无法识别内容或网络错误")
+                    self.btn_analyze.enabled = True
+                    self.btn_analyze.text = "✨ AI 分析并导入"
+                    self.app.main_window.dialog(toga.InfoDialog("失败", "AI 无法识别内容或网络错误"))
 
             self.app.loop.call_soon_threadsafe(on_complete)
 

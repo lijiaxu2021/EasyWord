@@ -104,6 +104,7 @@ def lookup_word_ai(word):
         
         # Robust Clean up
         clean_content = content.replace("```json", "").replace("```", "").strip()
+        print(f"DEBUG: AI Raw Content: {clean_content}") # LOG
         
         # Extract JSON if mixed with text
         start = clean_content.find('{')
@@ -116,4 +117,6 @@ def lookup_word_ai(word):
             
     except Exception as e:
         print(f"AI Lookup Error: {e}")
+        import traceback
+        traceback.print_exc()
         return None

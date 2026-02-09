@@ -19,8 +19,7 @@ STYLE_ROOT = Pack(direction=COLUMN, flex=1, background_color=COLOR_BACKGROUND)
 # Card Style - Flat with border for "modern" look (Shadows not supported well)
 STYLE_CARD = Pack(
     direction=COLUMN, 
-    margin=8, 
-    padding=12, 
+    margin=12, 
     background_color=COLOR_SURFACE, 
     flex=1
 )
