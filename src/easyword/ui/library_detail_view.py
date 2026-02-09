@@ -13,6 +13,7 @@ class LibraryDetailView(toga.Box):
         self.mode = mode # 'manage' or 'quiz'
         self.selected_word_ids = set()
         self.word_widgets = {} # id -> widget
+        self.show_definitions = True # Default to show
         self.build_ui()
         
     def build_ui(self):
@@ -41,6 +42,12 @@ class LibraryDetailView(toga.Box):
         
         # Add/Import only in manage mode
         if self.mode == 'manage':
+            self.btn_toggle_eye = toga.Button(
+                "👁️", 
+                on_press=self.toggle_definitions_visibility, 
+                style=Pack(background_color='transparent', font_size=20, width=40, color='white')
+            )
+            
             btn_add = toga.Button(
                 "+ 导入", 
                 on_press=self.go_import,
@@ -48,6 +55,7 @@ class LibraryDetailView(toga.Box):
             )
             header.add(btn_back)
             header.add(title)
+            header.add(self.btn_toggle_eye)
             header.add(btn_add)
         else:
             header.add(btn_back)
@@ -112,6 +120,11 @@ class LibraryDetailView(toga.Box):
             self.list_container.add(item)
             self.word_widgets[word['id']] = item
 
+    def toggle_definitions_visibility(self, widget):
+        self.show_definitions = not self.show_definitions
+        self.btn_toggle_eye.text = "👁️" if self.show_definitions else "🔒"
+        self.refresh_list()
+
     def create_word_item(self, word):
         # Improved Layout:
         # [ Word Info (Clickable for Edit/Detail) ] [ Checkbox ]
@@ -143,8 +156,12 @@ class LibraryDetailView(toga.Box):
         info_box.add(btn_word)
         
         if word['definition_cn']:
-            defi = word['definition_cn'].replace('\n', ' ')
-            if len(defi) > 20: defi = defi[:20] + "..."
+            if self.show_definitions:
+                defi = word['definition_cn'].replace('\n', ' ')
+                if len(defi) > 20: defi = defi[:20] + "..."
+            else:
+                defi = "******"
+                
             # Definition label (non-interactive, but visually part of the row)
             lbl_def = toga.Label(defi, style=Pack(font_size=12, color=COLOR_TEXT_SECONDARY, margin_left=4))
             info_box.add(lbl_def)
