@@ -32,6 +32,9 @@ jobs:
           # The action tries to chown to $USER, but 'user' might not exist in the container.
           # We force it to root, which always exists.
           USER: root
+          # Fix for "error: externally-managed-environment" (PEP 668)
+          # This allows pip to install packages system-wide inside the Docker container
+          PIP_BREAK_SYSTEM_PACKAGES: 1
 
       # Upload Artifacts
       - name: Upload APK
