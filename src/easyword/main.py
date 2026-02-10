@@ -26,6 +26,7 @@ class EasyWordApp(MDApp):
         self.theme_cls.theme_style = "Light"
         
         # Init Data Path
+        # ... (keep existing logic)
         if platform == 'android':
             from android.storage import app_storage_path
             self.data_dir = os.path.join(app_storage_path(), 'EasyWord')
@@ -45,7 +46,10 @@ class EasyWordApp(MDApp):
         self.db_manager = db_manager
 
         # Root Layout: Bottom Navigation
-        # Note: KivyMD 1.2.0 BottomNavigation structure might differ slightly, using standard approach
+        # Using a proper screen manager approach to ensure touch events propagate correctly
+        # But MDBottomNavigation is self-contained.
+        
+        # NOTE: Ensure we return the root widget.
         return Builder.load_string('''
 MDScreen:
     MDBottomNavigation:

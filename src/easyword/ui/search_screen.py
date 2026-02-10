@@ -66,11 +66,23 @@ class SearchScreen(MDScreen):
         self.content_container.add_widget(MDLabel(text="AI 正在深度分析中...", halign="center", theme_text_color="Primary"))
         self.input_search.disabled = True
         
+        # Use Clock to schedule UI update on main thread if needed inside thread, 
+        # but here we start a thread that calls a callback which then uses Clock.
         threading.Thread(target=self.run_search, args=(word,), daemon=True).start()
 
     def run_search(self, word):
-        res = lookup_word_ai(word)
-        Clock.schedule_once(lambda dt: self.on_search_complete(res, word))
+        try:
+            res = lookup_word_ai(word)
+            # Schedule UI update on main thread
+            Clock.schedule_once(lambda dt: self.on_search_complete(res, word))
+        except Exception as e:
+            print(f"Search Error: {e}")
+            Clock.schedule_once(lambda dt: self.on_search_error(str(e)))
+
+    def on_search_error(self, error_msg):
+        self.input_search.disabled = False
+        self.content_container.clear_widgets()
+        self.content_container.add_widget(MDLabel(text=f"错误: {error_msg}", halign="center", theme_text_color="Error"))
 
     def on_search_complete(self, res, word):
         self.input_search.disabled = False

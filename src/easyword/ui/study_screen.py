@@ -160,9 +160,21 @@ class StudyScreen(MDScreen):
             pass
 
     def next_word(self, instance):
+        if not self.words:
+            return
+            
         self.current_index += 1
         if self.current_index >= len(self.words):
-            self.current_index = 0 # Loop back or finish
-            # Show "Finish" toast?
+            self.current_index = 0 # Loop back
+            # Or show a "Finished" card
+            # For now, loop back is safer than crash
             
-        self.show_word(self.words[self.current_index])
+        # Safety check again
+        if 0 <= self.current_index < len(self.words):
+            self.show_word(self.words[self.current_index])
+        else:
+            self.current_index = 0
+            if self.words:
+                self.show_word(self.words[0])
+            else:
+                self.show_empty_state()
