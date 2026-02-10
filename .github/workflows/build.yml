@@ -27,6 +27,11 @@ jobs:
         with:
           command: buildozer android debug
           buildozer_version: master
+        env:
+          # Fix for "chown: invalid user: 'user'" error
+          # The action tries to chown to $USER, but 'user' might not exist in the container.
+          # We force it to root, which always exists.
+          USER: root
 
       # Upload Artifacts
       - name: Upload APK
