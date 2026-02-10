@@ -82,44 +82,44 @@ class BulkImportView(toga.Box):
         self.input_text.readonly = True
         
         def run():
-            results = generate_word_info_bulk(text)
+            self.app.main_window.dialog(toga.InfoDialog("请稍候", "AI 正在分批分析您的文本，这可能需要一两分钟..."))
+            
+            # Use the new chunked processing function
+            words_data = generate_word_info_bulk(text)
             
             def on_complete():
                 self.btn_analyze.enabled = True
                 self.btn_analyze.text = "✨ AI 分析并导入"
-                self.input_text.readonly = False
                 
-                if results and isinstance(results, list):
+                if words_data:
                     count = 0
-                    for item in results:
-                        word = item.get('word')
-                        if word:
-                            # Flatten data for simple storage
-                            def_cn = item.get('definition_cn')
-                            if isinstance(def_cn, list):
-                                def_cn = "\n".join(def_cn)
-                            
-                            ex = item.get('example')
-                            if isinstance(ex, list):
-                                pass # Already string usually based on prompt
-                            
-                            res = db_manager.add_word(
-                                word=word,
+                    for w in words_data:
+                        # ... (existing insertion logic)
+                        # Ensure string format
+                        def_cn = w.get('definition_cn', '')
+                        if isinstance(def_cn, list): def_cn = "\n".join([str(x) for x in def_cn])
+                        example = w.get('example', '')
+                        if isinstance(example, list): example = "\n".join([str(x) for x in example])
+                        memory_method = w.get('memory_method', '')
+                        if isinstance(memory_method, list): memory_method = "\n".join([str(x) for x in memory_method])
+
+                        # Check exist
+                        if not self.app.db_manager.get_word_by_text(self.app.current_library_id, w['word']):
+                            self.app.db_manager.add_word(
+                                word=w['word'],
                                 definition_cn=def_cn,
-                                phonetic=item.get('phonetic', ''),
-                                definition_en=item.get('definition_en', ''),
-                                example=ex,
-                                library_id=self.library_id
+                                phonetic=w.get('phonetic', ''),
+                                definition_en=w.get('definition_en', ''),
+                                example=example,
+                                memory_method=memory_method,
+                                library_id=self.app.current_library_id
                             )
-                            if res:
-                                count += 1
-                    
+                            count += 1
+                            
                     self.app.main_window.dialog(toga.InfoDialog("完成", f"成功导入 {count} 个单词！"))
                     self.on_cancel() # Go back
                 else:
-                    self.btn_analyze.enabled = True
-                    self.btn_analyze.text = "✨ AI 分析并导入"
-                    self.app.main_window.dialog(toga.InfoDialog("失败", "AI 无法识别内容或网络错误"))
+                    self.app.main_window.dialog(toga.InfoDialog("失败", "AI 无法识别内容或网络错误，请重试"))
 
             self.app.loop.call_soon_threadsafe(on_complete)
 
