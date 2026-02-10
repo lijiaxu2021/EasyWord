@@ -55,25 +55,38 @@ def generate_word_info_bulk(text):
         return None
 
     # Step B: Process in Chunks
-    CHUNK_SIZE = 5 # Small chunk size to ensure quality and fit in context
-    all_results = []
+    CHUNK_SIZE = 5 
     
     for i in range(0, len(words_list), CHUNK_SIZE):
         chunk = words_list[i:i + CHUNK_SIZE]
         print(f"DEBUG: Processing chunk {i//CHUNK_SIZE + 1}: {chunk}")
         
         chunk_prompt = f"""
-        Provide detailed learning information for these English words: {chunk}
+        You are a strict JSON data generator. Analyze these English words: {chunk}
         
-        Return a JSON Array of objects. Each object must contain:
-        - "word": The word itself.
-        - "phonetic": IPA symbol.
-        - "definition_cn": Detailed Chinese definition with parts of speech.
-        - "definition_en": Concise English definition.
-        - "example": String with 2 example sentences (bilingual).
-        - "memory_method": A creative memory aid (Chinese, ~50 chars).
+        Return a JSON Array of objects.
         
-        Strict JSON Array only.
+        STRICT JSON FORMAT RULES:
+        1. "word": String.
+        2. "phonetic": String.
+        3. "definition_cn": String (NOT List). Format: "pos. meaning".
+        4. "definition_en": String.
+        5. "example": String (NOT List). Format: "En sentence. Cn translation.\\nEn sentence 2. Cn translation."
+        6. "memory_method": String (NOT List).
+        
+        EXAMPLE OUTPUT:
+        [
+            {{
+                "word": "apple",
+                "phonetic": "/ˈæpəl/",
+                "definition_cn": "n. 苹果",
+                "definition_en": "A round fruit with red or green skin",
+                "example": "I ate an apple. 我吃了一个苹果。",
+                "memory_method": "A for Apple."
+            }}
+        ]
+        
+        NO MARKDOWN. NO COMMENTS. ONLY JSON.
         """
         
         try:
@@ -84,23 +97,21 @@ def generate_word_info_bulk(text):
                 "model": MODEL,
                 "messages": [{"role": "user", "content": chunk_prompt}],
                 "max_tokens": 2048,
-                "temperature": 0.7
-            }, timeout=45) # Longer timeout for batch
+                "temperature": 0.3 # Lower temp for strict format
+            }, timeout=45) 
             
             response.raise_for_status()
             chunk_results = _parse_json_response(response.json())
             
             if chunk_results and isinstance(chunk_results, list):
-                all_results.extend(chunk_results)
+                # Yield results immediately instead of collecting all
+                yield chunk_results
             else:
                 print(f"DEBUG: Chunk failed parsing: {chunk}")
                 
         except Exception as e:
             print(f"AI Chunk Error ({chunk}): {e}")
-            # Continue to next chunk instead of failing all
             continue
-            
-    return all_results
 
 def _parse_json_response(data):
     """Helper to safely parse JSON from AI response"""

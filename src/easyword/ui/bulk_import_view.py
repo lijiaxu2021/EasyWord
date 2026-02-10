@@ -32,17 +32,21 @@ class BulkImportView(toga.Box):
         
         # 2. Input Area
         # Use a container for the input to control margins better
-        input_container = toga.Box(style=Pack(flex=1, padding_left=15, padding_right=15, padding_bottom=15))
+        input_container = toga.Box(style=Pack(flex=1, direction=COLUMN, padding=15))
         
         self.input_text = toga.MultilineTextInput(
             placeholder="例如：\napple, banana\nI want to learn computer science.",
-            style=STYLE_INPUT
+            style=Pack(flex=1, font_family='monospace', margin_bottom=10)
         )
-        # Ensure input takes up all space in its container
-        self.input_text.style.flex = 1
-        self.input_text.style.font_family = 'monospace'
-        
         input_container.add(self.input_text)
+        
+        # Log/Progress Area (Scrollable)
+        self.log_area = toga.MultilineTextInput(
+            readonly=True,
+            style=Pack(height=120, font_family='monospace', font_size=10, background_color='#F5F5F5')
+        )
+        input_container.add(self.log_area)
+        
         self.add(input_container)
         
         # 3. Actions
@@ -64,63 +68,83 @@ class BulkImportView(toga.Box):
             on_press=self.do_analyze, 
             style=STYLE_BTN_PRIMARY
         )
-        # Manually set flex/height if style dict doesn't fully cover it in this context
         self.btn_analyze.style.flex = 2
         
         btn_box.add(btn_cancel)
         btn_box.add(self.btn_analyze)
         self.add(btn_box)
 
+    def log(self, message):
+        self.log_area.value += f"{message}\n"
+        self.log_area.scroll_to_bottom()
+
     def do_analyze(self, widget):
         text = self.input_text.value.strip()
         if not text:
-            self.app.main_window.info_dialog("提示", "请输入文本内容")
+            self.app.main_window.dialog(toga.InfoDialog("提示", "请输入文本内容"))
             return
             
         self.btn_analyze.enabled = False
         self.btn_analyze.text = "AI 正在分析中..."
-        self.input_text.readonly = True
+        self.log_area.value = "任务开始...\n"
         
         def run():
-            self.app.main_window.dialog(toga.InfoDialog("请稍候", "AI 正在分批分析您的文本，这可能需要一两分钟..."))
-            
-            # Use the new chunked processing function
-            words_data = generate_word_info_bulk(text)
-            
-            def on_complete():
-                self.btn_analyze.enabled = True
-                self.btn_analyze.text = "✨ AI 分析并导入"
+            try:
+                # Step 1: Extraction (First log)
+                self.app.loop.call_soon_threadsafe(lambda: self.log("正在提取单词列表..."))
                 
-                if words_data:
-                    count = 0
-                    for w in words_data:
-                        # ... (existing insertion logic)
-                        # Ensure string format
-                        def_cn = w.get('definition_cn', '')
-                        if isinstance(def_cn, list): def_cn = "\n".join([str(x) for x in def_cn])
-                        example = w.get('example', '')
-                        if isinstance(example, list): example = "\n".join([str(x) for x in example])
-                        memory_method = w.get('memory_method', '')
-                        if isinstance(memory_method, list): memory_method = "\n".join([str(x) for x in memory_method])
+                # generate_word_info_bulk is now a generator
+                total_added = 0
+                
+                # Iterate over the generator
+                for chunk_data in generate_word_info_bulk(text):
+                    if not chunk_data: continue
+                    
+                    self.app.loop.call_soon_threadsafe(lambda: self.log(f"收到分析数据 ({len(chunk_data)} 个)..."))
+                    
+                    chunk_count = 0
+                    for w in chunk_data:
+                        # Ensure string format (Double safety)
+                        def_cn = str(w.get('definition_cn', ''))
+                        example = str(w.get('example', ''))
+                        memory_method = str(w.get('memory_method', ''))
+                        phonetic = str(w.get('phonetic', ''))
+                        def_en = str(w.get('definition_en', ''))
+                        word = str(w.get('word', ''))
 
                         # Check exist
-                        if not self.app.db_manager.get_word_by_text(self.app.current_library_id, w['word']):
+                        if not self.app.db_manager.get_word_by_text(self.app.current_library_id, word):
                             self.app.db_manager.add_word(
-                                word=w['word'],
+                                word=word,
                                 definition_cn=def_cn,
-                                phonetic=w.get('phonetic', ''),
-                                definition_en=w.get('definition_en', ''),
+                                phonetic=phonetic,
+                                definition_en=def_en,
                                 example=example,
                                 memory_method=memory_method,
                                 library_id=self.app.current_library_id
                             )
-                            count += 1
+                            chunk_count += 1
+                            self.app.loop.call_soon_threadsafe(lambda w=word: self.log(f"  + {w}"))
+                        else:
+                            self.app.loop.call_soon_threadsafe(lambda w=word: self.log(f"  = {w} (已存在)"))
                             
-                    self.app.main_window.dialog(toga.InfoDialog("完成", f"成功导入 {count} 个单词！"))
-                    self.on_cancel() # Go back
-                else:
-                    self.app.main_window.dialog(toga.InfoDialog("失败", "AI 无法识别内容或网络错误，请重试"))
+                    total_added += chunk_count
+                    self.app.loop.call_soon_threadsafe(lambda c=chunk_count: self.log(f"本批入库: {c}"))
 
-            self.app.loop.call_soon_threadsafe(on_complete)
+                def on_finish():
+                    self.btn_analyze.enabled = True
+                    self.btn_analyze.text = "✨ AI 分析并导入"
+                    self.app.main_window.dialog(toga.InfoDialog("完成", f"任务结束，共导入 {total_added} 个新单词！"))
+                    
+                self.app.loop.call_soon_threadsafe(on_finish)
+                
+            except Exception as e:
+                print(f"Import Error: {e}")
+                def on_error():
+                    self.btn_analyze.enabled = True
+                    self.btn_analyze.text = "✨ AI 分析并导入"
+                    self.log(f"错误: {e}")
+                    self.app.main_window.dialog(toga.InfoDialog("错误", "处理过程中发生异常"))
+                self.app.loop.call_soon_threadsafe(on_error)
 
         threading.Thread(target=run, daemon=True).start()
