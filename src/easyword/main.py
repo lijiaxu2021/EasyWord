@@ -8,15 +8,15 @@ import os
 import sys
 
 # Import logic modules (reusing existing logic)
-from .database.manager import db_manager
-from .utils.logger import Logger
+from easyword.database.manager import db_manager
+from easyword.utils.logger import Logger
 
 # Import UI screens
-from .ui.study_screen import StudyScreen
-from .ui.quiz_screen import QuizScreen
-from .ui.library_screen import LibraryScreen
-from .ui.search_screen import SearchScreen
-from .ui.settings_screen import SettingsScreen
+from easyword.ui.study_screen import StudyScreen
+from easyword.ui.quiz_screen import QuizScreen
+from easyword.ui.library_screen import LibraryScreen
+from easyword.ui.search_screen import SearchScreen
+from easyword.ui.settings_screen import SettingsScreen
 
 class EasyWordApp(MDApp):
     def build(self):
