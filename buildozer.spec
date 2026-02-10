@@ -70,6 +70,9 @@ android.api = 33
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
+# (bool) Skip asking for license acceptance (useful for CI)
+android.accept_sdk_license = True
+
 # (int) Android SDK version to use
 #android.sdk = 20
 
