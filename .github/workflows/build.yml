@@ -25,7 +25,13 @@ jobs:
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
-          command: buildozer android debug
+          # Install Java 17 inside the Docker container before running buildozer
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y openjdk-17-jdk
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            export PATH=$JAVA_HOME/bin:$PATH
+            buildozer android debug
           buildozer_version: master
         env:
           # Fix for "chown: invalid user: 'user'" error
