@@ -70,7 +70,8 @@
 ### 环境要求
 - Python 3.8+
 - Git
-- BeeWare (Briefcase)
+- Kivy & KivyMD (用于 UI)
+- Buildozer (用于 Android 打包，仅限 Linux/macOS)
 
 ### 安装步骤
 
@@ -78,6 +79,7 @@
    ```bash
    git clone git@github.com:lijiaxu2021/EasyWord.git
    cd EasyWord
+   git checkout feature/kivy-migration  # 切换到 Kivy 分支
    ```
 
 2. **创建虚拟环境**
@@ -91,30 +93,33 @@
 
 3. **安装依赖**
    ```bash
-   pip install briefcase
    pip install -r requirements.txt
    ```
 
 4. **运行开发模式**
    ```bash
-   briefcase dev
+   python main.py
    ```
 
-5. **打包应用**
-   - **Android**:
-     ```bash
-     briefcase create android
-     briefcase build android
-     briefcase package android
-     ```
-   - **Windows**:
-     ```bash
-     briefcase package windows
-     ```
+5. **打包应用 (Android)**
+   由于 Buildozer 仅支持 Linux/macOS，推荐使用 GitHub Actions 自动构建：
+   - 将代码推送到 GitHub。
+   - 在 Actions 标签页查看 "Build Android APK" 工作流。
+   - 构建完成后下载 APK。
+
+   **手动构建 (Linux only)**:
+   ```bash
+   buildozer android debug
+   ```
 
 ---
 
 ## 📅 更新日志 (Changelog)
+
+### v1.3.0 (2026-02-10) - 框架迁移 (KivyMD)
+- **[Refactor]** 将 UI 框架从 BeeWare (Toga) 迁移至 KivyMD，提供更现代的 Material Design 体验。
+- **[Feature]** 重写了所有核心界面：学习、查词、词库。
+- **[Dev]** 引入 GitHub Actions 自动构建流程，解决 Windows 无法打包 Android 的问题。
 
 ### v1.1.1 (2026-02-09) - 修复与优化
 - **[Fix]** 修复了 Toga 在 Android 上的样式废弃警告 (Padding/Alignment)。
